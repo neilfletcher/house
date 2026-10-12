@@ -7,6 +7,16 @@
   gtag('js', new Date());
   gtag('config', 'G-JF54HQGVLT');
 </script>
+<script>
+  // Usage events for the admin dashboard: what was done here, never who did it.
+  window.ssTrack = function (name, detail) {
+    try { if (window.gtag) gtag('event', name, detail ? { detail: String(detail).slice(0, 60) } : {}); } catch (e) {}
+  };
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('[data-tab]');
+    if (t) window.ssTrack('tab_viewed', t.getAttribute('data-tab'));
+  }, true);
+</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
@@ -1024,5 +1034,19 @@ footer {
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') close();
   });
+})();
+</script>
+<script>
+(function () {
+  // Records how far people get: one event per section, the first time it scrolls into view.
+  if (!window.IntersectionObserver || !window.ssTrack) return;
+  var seen = {};
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      var id = en.target.id;
+      if (en.isIntersecting && id && !seen[id]) { seen[id] = 1; window.ssTrack('room_viewed', id.replace(/^room-/, '')); }
+    });
+  }, { rootMargin: '0px 0px -50% 0px' });
+  document.querySelectorAll('section.room[id]').forEach(function (s) { io.observe(s); });
 })();
 </script>
